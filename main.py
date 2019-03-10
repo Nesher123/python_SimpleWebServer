@@ -1,11 +1,19 @@
 from bottle import route, run, post, get, request
+from pymongo import MongoClient
 
-names = ['Roman', 'Ofir']
- 
+MONGODB_URI = "mongodb://wework:wework1@ds163825.mlab.com:63825/wework"
+client = MongoClient(MONGODB_URI, connectTimeoutMS=30000)
+db = client.get_database("wework")
+collection = db.names
+namesArray = []
+
+for name in collection.find():
+    namesArray.append(name['name'])
+
 message = """<html>
 <body>
     <div>
-        <p>Names: {names}</p> 
+        <p>Names: {namesArray}</p> 
         </br>
         </br>
         </br>
@@ -18,7 +26,7 @@ message = """<html>
 </body>
 </html>"""
 
-new_message = message.format(names=names)
+new_message = message.format(namesArray=namesArray)
 
 @get('/')
 def dashboard():
@@ -27,8 +35,14 @@ def dashboard():
 @post('/addName')
 def addName():
     newName = request.forms.get('name')
-    names.append(newName)
-    new_message = message.format(names=names)
+    collection.insert({"name": newName})
+
+    namesArray = []
+    
+    for name in collection.find():
+        namesArray.append(name['name'])
+
+    new_message = message.format(namesArray=namesArray)
     return new_message
 
 
