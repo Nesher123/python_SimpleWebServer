@@ -4,6 +4,8 @@ TO RUN:
 <br>
 pip install bottle
 <br>
+pip install pymongo
+<br>
 python main.py
 
 
